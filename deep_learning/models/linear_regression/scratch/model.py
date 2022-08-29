@@ -1,6 +1,6 @@
 from turtle import forward
 import torch
-from torch import Module
+from torch.nn import Module
 
 
 class LinearRegression(Module):
@@ -19,6 +19,16 @@ class LinearRegression(Module):
 
     def configure_optimizers(self):
         return SGD([self.w, self.b], self.lr)
+
+    def training_step(self, batch):
+        l = self.loss(self(*batch[:-1]), batch[-1])
+        # self.plot('loss', l, train=True)
+        return l
+
+    def validation_step(self, batch):
+        l = self.loss(self(*batch[:-1]), batch[-1])
+        # self.plot('loss', l, train=False)
+
 
 
 class SGD:
