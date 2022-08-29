@@ -40,3 +40,9 @@ class SynteticRegressionData:
         # Slightly concise implementation of data representation, could also use torch.utils.data.Dataset
         indices = slice(0, self.num_train) if is_train else slice(self.num_train, None)
         return self._get_tensor_loader((self.x, self.y), is_train, indices)
+
+    def train_dataloader(self):
+        return self.get_dataloader(is_train=True)
+    
+    def val_dataloader(self):
+        return self.get_dataloader(is_train=False)
