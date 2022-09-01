@@ -2,6 +2,7 @@
 Non concise way to implement Trainer like hugging face or pytorch lightning
 """
 import torch
+from tqdm import tqdm
 
 class Trainer:
     def __init__(self, max_epochs, use_gpu=False, gradient_clip_val=0) -> None:
@@ -31,7 +32,9 @@ class Trainer:
         self.epoch = 0
         self.train_batch_idx = 0
         self.val_batch_idx = 0
-        for self.epoch in range(self.max_epochs):
+        # TODO: this is stupid but works for now
+        description = f"Training {str(type(model)).split('.')[-1][:-2]}"
+        for self.epoch in tqdm(range(self.max_epochs), desc=description):
             self.fit_epoch()
 
     def _prepare_batch(self, batch):
