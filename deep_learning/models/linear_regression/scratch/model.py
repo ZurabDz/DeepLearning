@@ -1,9 +1,9 @@
-from turtle import forward
 import torch
 from torch.nn import Module
+from deep_learning.utils.module import ExtendedModule
 
 
-class LinearRegression(Module):
+class LinearRegression(ExtendedModule):
     def __init__(self, num_inputs, lr, sigma=0.01) -> None:
         super().__init__()
         self.lr = lr
@@ -22,7 +22,7 @@ class LinearRegression(Module):
 
     def training_step(self, batch):
         l = self.loss(self(*batch[:-1]), batch[-1])
-        # self.plot('loss', l, train=True)
+        self.plot('loss', l, train=True)
         return l
 
     def validation_step(self, batch):

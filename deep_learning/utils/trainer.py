@@ -20,7 +20,7 @@ class Trainer:
 
     def _prepare_model(self, model):
         model.trainer = self
-        # model.board.xlim = [0, self.max_epochs]
+        model.board.xlim = [0, self.max_epochs]
         if self.use_gpu:
             model.to('cuda')
         self.model = model
