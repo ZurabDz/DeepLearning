@@ -2,6 +2,7 @@ from deep_learning.utils.module import ExtendedModule
 import torch
 
 
+# TODO: ExtendedModule is stupid way of logging I will wrap torch.utils.tensorboard import SummaryWriter later...
 class LinearRegression(ExtendedModule):
     def __init__(self, lr):
         super().__init__()
