@@ -8,6 +8,7 @@ class FashionMNIST:
     def __call__(self, root, num_workers, batch_size=64, resize=(28, 28)):
         self.trans = transforms.Compose([transforms.Resize(resize), transforms.ToTensor()])
         self.root = root
+        self.batch_size = batch_size
         self.num_workers = num_workers
 
         self.train = torchvision.datasets.FashionMNIST(
