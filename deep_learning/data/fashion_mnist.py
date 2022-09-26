@@ -5,7 +5,7 @@ from torchvision import transforms
 from deep_learning.utils.image import show_images
 
 class FashionMNIST:
-    def __call__(self, root, num_workers, batch_size=64, resize=(28, 28)):
+    def __init__(self, root, num_workers, batch_size=64, resize=(28, 28)):
         self.trans = transforms.Compose([transforms.Resize(resize), transforms.ToTensor()])
         self.root = root
         self.batch_size = batch_size
@@ -24,6 +24,12 @@ class FashionMNIST:
                     'sandal', 'shirt', 'sneaker', 'bag', 'ankle boot']
 
         return [labels[int(i)] for i in indices]
+
+    def train_dataloader(self):
+        return self.get_dataloader(train=True)
+
+    def val_dataloader(self):
+        return self.get_dataloader(train=False)
 
     def get_dataloader(self, train):
         data = self.train if train else self.valid
