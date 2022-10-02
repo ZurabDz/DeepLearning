@@ -8,3 +8,6 @@ examples/data/*
 __pycache__/
 *.so
 *~
+# Those are tmp
+**/data/*
+**/tokenizer/*
