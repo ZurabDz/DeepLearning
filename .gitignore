@@ -11,3 +11,5 @@ __pycache__/
 # Those are tmp
 **/data/*
 **/tokenizer/*
+**/output/*
+**/wikitext-103-v1/*
