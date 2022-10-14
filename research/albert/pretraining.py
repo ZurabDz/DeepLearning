@@ -1,19 +1,26 @@
 from transformers import AlbertForMaskedLM, AlbertConfig
-from transformers.models.albert.tokenization_albert_fast import AlbertTokenizerFast
+from transformers import AlbertTokenizerFast
 from transformers import DataCollatorForLanguageModeling
 from transformers import TrainingArguments, Trainer
 from datasets import load_dataset
 from itertools import chain
 
 
-
-max_length = 512
-vocab_size = 31_000
+max_length = 256
+# tokenizer vocab size is 30_000 Model's torch.embedding can be index at max embedding_dim-1 (embedding_dim is model's vocabsize hence 30_001)
+vocab_size = 30_001
 truncate_longer_samples = False
 
-tokenizer = AlbertTokenizerFast.from_pretrained('tokenizer', model_max_length=max_length)
 
-print(tokenizer)
+# TODO: what's wrong with rust that creates infinite recursion
+# def _convert_token_to_id_with_added_voc(self, token: str) -> int:
+#         index = self._tokenizer.token_to_id(token)
+#         if index is None:
+#             # return self.unk_token_id
+#             return self.vocab_size
+#         return index
+
+tokenizer = AlbertTokenizerFast(tokenizer_file='tokenizer.json', model_max_length=max_length)
 
 
 def encode_with_truncation(examples):
@@ -25,33 +32,19 @@ def encode_without_truncation(examples):
   """Mapping function to tokenize the sentences passed without truncation"""
   return tokenizer(examples['text'], return_special_tokens_mask=True)
 
-# the encode function will depend on the truncate_longer_samples variable
+
 encode = encode_with_truncation if truncate_longer_samples else encode_without_truncation
 
 config = AlbertConfig.from_pretrained('albert-base-v2')
-# TODO: WHY?
 config.vocab_size=vocab_size
-
 model = AlbertForMaskedLM(config=config)
 
-print(config)
+dataset = load_dataset('text', data_files={'train': ['wikitext-103-v1/wikitext-103/wiki.train.tokens'],
+ 'valid': ['wikitext-103-v1/wikitext-103/wiki.valid.tokens']})
 
 
-dataset = load_dataset('text', data_files={'train': ['data/text_corpus/xaa'], 'valid': ['data/text_corpus/xab']})
-
-print(dataset)
-
-
-
-# print(encode(dataset['train'][0]))
-
-
-# tokenizing the train dataset (TOD: Make this bad boy on custom dataset)
-train_dataset = dataset["train"].map(encode, batched=True, num_proc=8)
-
-
-# tokenizing the testing dataset
-test_dataset = dataset["valid"].map(encode, batched=True, num_proc=8)
+train_dataset = dataset["train"].map(encode, batched=True, num_proc=12)
+test_dataset = dataset["valid"].map(encode, batched=True, num_proc=12)
 
 
 if truncate_longer_samples:
@@ -63,6 +56,7 @@ else:
   # remove other columns, and remain them as Python lists
   test_dataset.set_format(columns=["input_ids", "attention_mask", "special_tokens_mask"])
   train_dataset.set_format(columns=["input_ids", "attention_mask", "special_tokens_mask"])
+
 
 
 
@@ -101,22 +95,25 @@ data_collator = DataCollatorForLanguageModeling(
 )
 
 
+from config import ds_config
+
 training_args = TrainingArguments(
     output_dir='output',          
     evaluation_strategy="steps",    
     overwrite_output_dir=True,      
     num_train_epochs=60,            
-    per_device_train_batch_size=4 , 
+    per_device_train_batch_size=13, 
     gradient_accumulation_steps=8,  
     per_device_eval_batch_size=6,  
-    logging_steps=500,             
-    save_steps=500,
+    logging_steps=250,             
+    save_steps=250,
     load_best_model_at_end=True,  
     save_total_limit=8,
     # no_cuda=True
     fp16=True,
-    fp16_opt_level='O2'
-    # half_precision_backend='apex'
+    fp16_opt_level='O2',
+    deepspeed=ds_config,
+    half_precision_backend='apex'
 )
 
 
