@@ -19,31 +19,30 @@ class ExtendedModule(torch.nn.Module):
         raise NotImplementedError
 
     def forward(self, X):
-        assert hasattr(self, 'net'), 'Neural network is defined'
+        assert hasattr(self, "net"), "Neural network is defined"
         return self.net(X)
 
     def plot(self, key, value, train):
-        assert hasattr(self, 'trainer'), 'Trainer is not inited'
-        self.board.xlabel = 'epoch'
+        assert hasattr(self, "trainer"), "Trainer is not inited"
+        self.board.xlabel = "epoch"
         if train:
-            x = self.trainer.train_batch_idx / \
-                self.trainer.num_train_batches
-            n = self.trainer.num_train_batches / \
-                self.plot_train_per_epoch
+            x = self.trainer.train_batch_idx / self.trainer.num_train_batches
+            n = self.trainer.num_train_batches / self.plot_train_per_epoch
         else:
             x = self.trainer.epoch + 1
-            n = self.trainer.num_val_batches / \
-                self.plot_valid_per_epoch
-        self.board.draw(x, value.detach().cpu().numpy(),
-                        ('train_' if train else 'val_') + key,
-                        every_n=int(n))
+            n = self.trainer.num_val_batches / self.plot_valid_per_epoch
+        self.board.draw(
+            x,
+            value.detach().cpu().numpy(),
+            ("train_" if train else "val_") + key,
+            every_n=int(n),
+        )
 
     def training_step(self, batch):
         l = self.loss(self(*batch[:-1]), batch[-1])
-        self.plot('loss', l, train=True)
+        self.plot("loss", l, train=True)
         return l
 
     def validation_step(self, batch):
         l = self.loss(self(*batch[:-1]), batch[-1])
-        self.plot('loss', l, train=False)
-     
+        self.plot("loss", l, train=False)
