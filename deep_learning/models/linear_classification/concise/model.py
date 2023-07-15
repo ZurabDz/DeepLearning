@@ -14,8 +14,7 @@ class SoftmaxRegression(ExtendedModule):
         return self.net(x)
 
     def loss(self, y_hat, y, averaged=True):
-        return F.cross_entropy(
-            y_hat, y, reduction='mean' if averaged else 'none')
+        return F.cross_entropy(y_hat, y, reduction="mean" if averaged else "none")
 
     def configure_optimizers(self):
         return torch.optim.SGD(self.parameters(), self.lr)
